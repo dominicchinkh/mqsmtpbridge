@@ -57,14 +57,10 @@ $callback = function ($msg) use ($connection) {
     }
 };
 
-foreach (getenv() as $key => $value) {
-    if (strpos($key, 'AMQP_CONSUME_QUEUES_') === 0) {
-        echo ("Consuming from queue: " . $value . "\n");
-        $channel->queue_declare($value, false, true, false, false);
-        $channel->queue_bind($value, getenv('AMQP_EXCHANGE'), '#');
-        $channel->basic_consume($value, '', false, true, false, false, $callback);
-    }
-}
+echo ("Consuming all topics\n");
+$channel->queue_declare("all", false, true, false, false);
+$channel->queue_bind("all", getenv('AMQP_EXCHANGE'), '#');
+$channel->basic_consume("all", '', false, true, false, false, $callback);
 
 while ($channel->is_consuming()) {
     try {
