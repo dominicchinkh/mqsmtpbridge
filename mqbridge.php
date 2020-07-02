@@ -26,7 +26,8 @@ $connection = new AMQPStreamConnection(
     $read_write_timeout = 60,
     $context = null,
     $keepalive = false,
-    $heartbeat = 30);
+    $heartbeat = 30
+);
 $channel = $connection->channel();
 $channel->exchange_declare(getenv('AMQP_EXCHANGE'), 'topic', false, true, false);
 
@@ -60,7 +61,7 @@ foreach (getenv() as $key => $value) {
     if (strpos($key, 'AMQP_CONSUME_QUEUES_') === 0) {
         echo ("Consuming from queue: " . $value . "\n");
         $channel->queue_declare($value, false, true, false, false);
-        $channel->queue_bind($value, 'topic_logs', '#');
+        $channel->queue_bind($value, getenv('AMQP_EXCHANGE'), '#');
         $channel->basic_consume($value, '', false, true, false, false, $callback);
     }
 }
