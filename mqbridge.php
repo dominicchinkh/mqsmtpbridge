@@ -56,10 +56,11 @@ $callback = function ($msg) use ($connection) {
     }
 };
 
-foreach (getenv() as $key=>$value) {
+foreach (getenv() as $key => $value) {
     if (strpos($key, 'AMQP_CONSUME_QUEUES_') === 0) {
-        echo("Consuming from queue: " . $value . "\n");
+        echo ("Consuming from queue: " . $value . "\n");
         $channel->queue_declare($value, false, true, false, false);
+        $channel->queue_bind($value, 'topic_logs', '#');
         $channel->basic_consume($value, '', false, true, false, false, $callback);
     }
 }
@@ -67,12 +68,11 @@ foreach (getenv() as $key=>$value) {
 while ($channel->is_consuming()) {
     try {
         $channel->wait();
-        }
-    catch(AMQPConnectionClosedException $e) {
-            echo("ERROR: ". $e->getFile() . "\n");
-            echo($e->getLine() . "\n");
-            echo($e->getMessage() . "\n");
-            echo($e->getTraceAsString() . "\n");
+    } catch (AMQPConnectionClosedException $e) {
+        echo ("ERROR: " . $e->getFile() . "\n");
+        echo ($e->getLine() . "\n");
+        echo ($e->getMessage() . "\n");
+        echo ($e->getTraceAsString() . "\n");
 
         $channel->reconnect();
     }
